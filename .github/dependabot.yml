@@ -1,0 +1,19 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+# 1. Quản lý thư viện Python (pip)
+  - package-ecosystem: "pip"
+    directory: "/" # Nơi chứa file requirements.txt
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # 2. Quản lý các GitHub Actions (ví dụ: action-gh-release, checkout)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
