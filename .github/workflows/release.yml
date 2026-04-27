@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*' # Kích hoạt khi bạn push tag (v1.0, v2.0...)
+      
+permissions:
+  contents: write
 
 jobs:
   build:
