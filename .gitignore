@@ -9,3 +9,5 @@ head/
 logs/
 splash/
 Texture2D/
+
+!requirements.txt
