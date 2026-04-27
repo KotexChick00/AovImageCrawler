@@ -1,0 +1,10 @@
+*.exe
+*.log
+*.spec
+*.txt
+build/
+dist/
+frame/
+head/
+splash/
+Texture2D/
