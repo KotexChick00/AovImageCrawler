@@ -6,5 +6,6 @@ build/
 dist/
 frame/
 head/
+logs/
 splash/
 Texture2D/

@@ -24,6 +24,7 @@ SPECIAL_FRAME = ["301270_B51"]
 SPLASH_DIR = os.path.join(OUTPUT_DIR, "splash")
 HEAD_DIR = os.path.join(OUTPUT_DIR, "head")
 FRAME_DIR = os.path.join(OUTPUT_DIR, "frame")
+LOG_DIR = os.path.join(OUTPUT_DIR, "logs")
 
 # Thread-safe session tracking
 _session_lock = threading.Lock()
@@ -36,8 +37,11 @@ def _record_session(file_path):
 
 
 def write_session_log(finished_at: datetime):
+    if not os.path.exists(LOG_DIR):
+        os.makedirs(LOG_DIR)
+        
     timestamp = finished_at.strftime("%Y%m%d%H%M%S")
-    log_filename = os.path.join(OUTPUT_DIR, f"{timestamp}.log")
+    log_filename = os.path.join(LOG_DIR, f"{timestamp}.log")
     with open(log_filename, "w", encoding="utf-8") as f:
         f.write(f"=== Session log — {finished_at.strftime('%Y-%m-%d %H:%M:%S')} ===\n")
         f.write(f"Total new files downloaded: {len(_session_downloads)}\n\n")
@@ -75,7 +79,8 @@ def fetch_hero_ids():
 
 def _append_persistent_log(file_path):
     with _session_lock:
-        with open(os.path.join(OUTPUT_DIR, "download.log"), "a") as logf:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        with open(os.path.join(LOG_DIR, "download.log"), "a") as logf:
             logf.write(f"{file_path}\n")
 
 
