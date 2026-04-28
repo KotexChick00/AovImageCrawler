@@ -13,7 +13,13 @@ SUFFIX_RANGE = range(100)        # skin index 00 to 99
 B_SUFFIX_RANGE = range(36, 100)  # B36 to B99 (splash only)
 OUTPUT_DIR = "."
 EVO5_ALT_SUFFIX = "_2"
-EVO5_ALT_SPLASH_LIST = [11620, 13311, 16707]
+# Lưu dưới dạng (hero_id, skin_index) để dùng chung cho splash, head, frame
+# Splash dùng :02 padding, head/frame không dùng padding — tách rõ ở đây
+EVO5_SKIN_LIST: list[tuple[int, int]] = [
+    (116, 20),   # splash: 11620,   head/frame: 3011620
+    (133, 11),   # splash: 13311,   head/frame: 3013311
+    (167,  7),   # splash: 16707,   head/frame: 301677
+]
 MISS_LIMIT = 15                  # dừng vòng lặp skin sau N miss liên tiếp
 
 FLOWBORN_SPECIAL_HERO_ID = [582,584] # 582 là pháp sư, 584 là xạ thủ
@@ -110,6 +116,9 @@ class MissCounter:
 
 # ── ID builders ───────────────────────────────────────────────────────────────
 
+def is_evo5_skin(hero_id, skin_index):
+    return (hero_id, skin_index) in EVO5_SKIN_LIST
+
 def build_splash_id(hero_id, skin_index, evo5=False):
     """
     Splash skin ID: {hero_id}{skin_index:02}[_2]
@@ -194,8 +203,8 @@ def _splash_variant(hero_id, hero_dir, skin_index, miss_counter):
         miss_counter.miss()
     else:
         miss_counter.hit()
-        # EVO5 variant — only for listed heroes
-        if hero_id in EVO5_ALT_SPLASH_LIST:
+        # EVO5 variant — check by skin ID (e.g. 11620 = hero 116, skin 20)
+        if is_evo5_skin(hero_id, skin_index):
             evo_id = build_splash_id(hero_id, skin_index, evo5=True)
             _download(f"{SPLASH_URL}{evo_id}.jpg", hero_dir, f"{evo_id}.jpg")
 
@@ -234,8 +243,8 @@ def _head_variant(hero_id, hero_dir, skin_index, miss_counter):
         miss_counter.miss()
     else:
         miss_counter.hit()
-        # EVO5 variant — only for listed heroes
-        if hero_id in EVO5_ALT_SPLASH_LIST:
+        # EVO5 variant — check by skin ID (e.g. 11620 = hero 116, skin 20)
+        if is_evo5_skin(hero_id, skin_index):
             evo_id = build_head_id(hero_id, skin_index, evo5=True)
             _download(f"{HEAD_URL}{evo_id}.jpg", hero_dir, f"{evo_id}.jpg")
 
@@ -323,8 +332,8 @@ def _frame_variant(hero_id, hero_dir, skin_index, miss_counter):
         miss_counter.miss()
     else:
         miss_counter.hit()
-        # EVO5 variant — only for listed heroes
-        if hero_id in EVO5_ALT_SPLASH_LIST:
+        # EVO5 variant — check by skin ID (e.g. 11620 = hero 116, skin 20)
+        if is_evo5_skin(hero_id, skin_index):
             evo_id = build_frame_id(hero_id, skin_index, evo5=True)
             _download(f"{HEAD_URL}{evo_id}.jpg", hero_dir, f"{evo_id}.jpg")
 
@@ -358,5 +367,19 @@ def main():
     write_session_log(finished_at)
 
 
+def test_specific():
+    # Chỉ định danh sách hero chứa các skin EVO5 bạn muốn test
+    test_heroes = [116, 133, 167]
+    mode = "all" # hoặc "head", "frame" tùy bạn
+    
+    print(f"--- Đang test các hero: {test_heroes} ---")
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for hero_id in test_heroes:
+            executor.submit(process_hero, hero_id, mode)
+            
+    finished_at = datetime.now()
+    write_session_log(finished_at)
+
 if __name__ == "__main__":
-    main()
+    # main()
+    test_specific()
