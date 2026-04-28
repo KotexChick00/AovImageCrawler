@@ -34,21 +34,16 @@ jobs:
           pyinstaller --onefile .\main.py --icon icon.ico --name "AoV Image Crawler"
 
       - name: Delete existing release asset (if any)
-        shell: pwsh
+        shell: bash
         run: |
-          $tag = "${{ github.ref_name }}"
-          $assetName = "AoV Image Crawler.exe"
-          $ErrorActionPreference = "SilentlyContinue"
-          gh release delete-asset $tag $assetName --yes 2>$null
-          $ErrorActionPreference = "Continue"
-          Write-Host "Asset cleanup done (ignored if not found)."
+          gh release delete-asset "${{ github.ref_name }}" "AoV Image Crawler.exe" --yes 2>/dev/null || true
+          echo "Asset cleanup done."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          # Đường dẫn file sau khi build xong (nằm trong folder dist)
           files: "dist/AoV Image Crawler.exe"
           generate_release_notes: true
         env:
