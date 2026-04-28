@@ -37,7 +37,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           # Đường dẫn file sau khi build xong (nằm trong folder dist)
-          files: "dist/Aov Image Crawler.exe"
+          files: "dist/AoV Image Crawler.exe"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
