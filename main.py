@@ -282,7 +282,12 @@ def _parse_special_frame_hero_id(file_id):
     # Bỏ prefix "30"
     without_prefix = file_id[len(HEAD_REQUIRED_PREFIX):]
     # Lấy phần số đầu tiên (trước _)
-    digits = re.match(r'(\d+)', without_prefix).group(1)
+    m = re.match(r'(\d+)', without_prefix)
+    if not m:
+        return None
+    digits = m.group(1)
+    if len(digits) < 2:
+        return None
     # digits = "1270" → hero_id = digits[:-1] = "127", skin = digits[-1] = "0"
     return int(digits[:-1])
 

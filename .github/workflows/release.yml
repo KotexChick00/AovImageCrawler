@@ -34,16 +34,14 @@ jobs:
           pyinstaller --onefile .\main.py --icon icon.ico --name "AoV Image Crawler"
 
       - name: Delete existing release asset (if any)
+        shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
           $assetName = "AoV Image Crawler.exe"
-          $release = gh release view $tag --json assets --jq ".assets[] | select(.name == \"$assetName\") | .id" 2>$null
-          if ($release) {
-            Write-Host "Deleting old asset: $assetName (id=$release)"
-            gh release delete-asset $tag $assetName --yes
-          } else {
-            Write-Host "No existing asset found, skipping delete."
-          }
+          $ErrorActionPreference = "SilentlyContinue"
+          gh release delete-asset $tag $assetName --yes 2>$null
+          $ErrorActionPreference = "Continue"
+          Write-Host "Asset cleanup done (ignored if not found)."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
