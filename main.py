@@ -366,20 +366,5 @@ def main():
     finished_at = datetime.now()
     write_session_log(finished_at)
 
-
-def test_specific():
-    # Chỉ định danh sách hero chứa các skin EVO5 bạn muốn test
-    test_heroes = [116, 133, 167]
-    mode = "all" # hoặc "head", "frame" tùy bạn
-    
-    print(f"--- Đang test các hero: {test_heroes} ---")
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        for hero_id in test_heroes:
-            executor.submit(process_hero, hero_id, mode)
-
-    finished_at = datetime.now()
-    write_session_log(finished_at)
-    
 if __name__ == "__main__":
-    # main()
-    test_specific()
+    main()
