@@ -31,7 +31,7 @@ jobs:
       - name: Build EXE with PyInstaller
         run: |
           # Sử dụng chính xác lệnh bạn đã cung cấp
-          pyinstaller --onefile .\main.py --icon icon.ico --name AovImageCrawler
+          pyinstaller --onefile .\main.py --icon icon.ico --name "AoV Image Crawler"
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v1
