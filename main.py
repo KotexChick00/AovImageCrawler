@@ -340,14 +340,14 @@ def _frame_variant(hero_id, hero_dir, skin_index, miss_counter):
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def process_hero(hero_id, mode):
-    """Process one hero — shared MissCounter across splash + head skin loops."""
-    miss_counter = MissCounter(limit=MISS_LIMIT)
+    """Process one hero — mỗi loại (splash/head/frame) dùng MissCounter riêng
+    để tránh counter của splash làm dừng vòng lặp skin của head/frame."""
     if mode in ("splash", "all"):
-        process_splash_downloads(hero_id, miss_counter)
+        process_splash_downloads(hero_id, MissCounter(limit=MISS_LIMIT))
     if mode in ("head", "all"):
-        process_head_downloads(hero_id, miss_counter)
+        process_head_downloads(hero_id, MissCounter(limit=MISS_LIMIT))
     if mode in ("frame", "all"):
-        process_frame_downloads(hero_id, miss_counter)
+        process_frame_downloads(hero_id, MissCounter(limit=MISS_LIMIT))
 
 
 def main():
@@ -376,10 +376,10 @@ def test_specific():
     with ThreadPoolExecutor(max_workers=5) as executor:
         for hero_id in test_heroes:
             executor.submit(process_hero, hero_id, mode)
-            
+
     finished_at = datetime.now()
     write_session_log(finished_at)
-
+    
 if __name__ == "__main__":
     # main()
     test_specific()
