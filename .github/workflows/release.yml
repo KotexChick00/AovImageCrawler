@@ -39,6 +39,7 @@ jobs:
           # Đường dẫn file sau khi build xong (nằm trong folder dist)
           files: "dist/AoV Image Crawler.exe"
           generate_release_notes: true
-          overwrite: true
+          overwrite_files: true
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
