@@ -1,4 +1,4 @@
-# AovImageCrawler
+# AoV Image Crawler
 
 <p align="center">
   <img src="icon.ico" width="80" alt="App Icon"/>
