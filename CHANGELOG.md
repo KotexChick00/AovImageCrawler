@@ -2,8 +2,7 @@
 
 ## [1.0.4] - 2026-04-28
 ### 🇻🇳 Sửa lỗi
-- Sửa lỗi **shared mutable state** khiến `head` và `frame` không thể tải 
-phiên bản EVO5.
+- Sửa lỗi **shared mutable state** khiến `head` và `frame` không thể tải phiên bản EVO5.
 - Sửa lỗi logic trong script `main.py` khi cào dữ liệu ảnh.
 
 ### 🇬🇧 Fixes

@@ -1,7 +1,10 @@
 *.exe
 *.log
+*.py[cod]
 *.spec
 *.txt
+
+**/__pycache__/
 build/
 dist/
 frame/
