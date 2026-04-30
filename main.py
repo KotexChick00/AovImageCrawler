@@ -12,13 +12,13 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from modules.core.config import (
-    SPLASH_DIR, HEAD_DIR, FRAME_DIR, LOG_DIR,
+    SPLASH_DIR, HEAD_DIR, BUST_DIR, LOG_DIR,
     HERO_WORKERS,
 )
 from modules.core.hero_processor import HeroProcessor
 from modules.downloaders.splash_downloader import SplashDownloader
 from modules.downloaders.head_downloader import HeadDownloader
-from modules.downloaders.frame_downloader import FrameDownloader
+from modules.downloaders.bust_downloader import BustDownloader
 from modules.utils.http_client import HttpClient
 from modules.utils.logger import SessionLogger
 
@@ -30,11 +30,11 @@ def select_mode() -> str:
     print("  Chọn chế độ tải:")
     print("  1. splash  — chỉ tải splash")
     print("  2. head    — chỉ tải head")
-    print("  3. frame   — chỉ tải frame")
+    print("  3. bust    — chỉ tải bust")
     print("  4. all     — tải tất cả (mặc định)")
     print("=" * 40)
     choice = input("Nhập lựa chọn [1/2/3/4], Enter để chọn all: ").strip()
-    mapping = {"1": "splash", "2": "head", "3": "frame"}
+    mapping = {"1": "splash", "2": "head", "3": "bust", "4": "all"}
     mode = mapping.get(choice, "all")
     print(f"→ Chế độ: {mode}\n")
     return mode
@@ -52,7 +52,7 @@ def build_processor() -> HeroProcessor:
     return HeroProcessor(
         splash=SplashDownloader(http),
         head=HeadDownloader(http),
-        frame=FrameDownloader(http),
+        bust=BustDownloader(http),
     )
 
 
@@ -60,7 +60,7 @@ def main() -> None:
     mode = select_mode()
 
     # Tạo thư mục đầu ra
-    for d in (SPLASH_DIR, HEAD_DIR, FRAME_DIR):
+    for d in (SPLASH_DIR, HEAD_DIR, BUST_DIR):
         os.makedirs(d, exist_ok=True)
 
     processor = build_processor()

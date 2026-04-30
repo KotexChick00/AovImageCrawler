@@ -1,7 +1,7 @@
 """
 id_builder.py — Các class xây dựng file ID theo từng loại asset.
 
-Mỗi loại asset (Splash / Head / Frame) có quy tắc đặt tên riêng;
+Mỗi loại asset (Splash / Head / Bust) có quy tắc đặt tên riêng;
 tách thành các class giúp dễ test, dễ mở rộng khi quy tắc thay đổi.
 """
 
@@ -64,9 +64,9 @@ class HeadIDBuilder(BaseIDBuilder):
         return self.build(hero_id, 0)
 
 
-class FrameIDBuilder(BaseIDBuilder):
+class BustIDBuilder(BaseIDBuilder):
     """
-    Frame skin ID: 30{hero_id}{skin_index}[_2]
+    Bust skin ID: 30{hero_id}{skin_index}[_2]
     Giống Head nhưng không có suffix 'head'.
     Ví dụ:
         hero=196, skin=2        → 301962
@@ -82,13 +82,13 @@ class FrameIDBuilder(BaseIDBuilder):
         return self.build(hero_id, 0)
 
     def build_flowborn(self, hero_id: int, gender: str) -> str:
-        """Flowborn frame ID: 30{hero_id}{FLOWBORN_UNIQUE_SUFFIX_ID}{gender}"""
+        """Flowborn bust ID: 30{hero_id}{FLOWBORN_UNIQUE_SUFFIX_ID}{gender}"""
         return f"{HEAD_REQUIRED_PREFIX}{hero_id}{FLOWBORN_UNIQUE_SUFFIX_ID}{gender}"
 
     @staticmethod
     def parse_hero_id_from_special(file_id: str) -> int | None:
         """
-        Lấy hero_id từ file_id đặc biệt trong SPECIAL_FRAME.
+        Lấy hero_id từ file_id đặc biệt trong SPECIAL_BUST.
         Quy tắc: bỏ prefix '30', lấy chuỗi số, bỏ chữ số cuối (skin=0).
         Ví dụ: '301270_B51' → '30' bỏ → '1270' → hero_id=127
         """

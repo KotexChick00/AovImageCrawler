@@ -1,9 +1,9 @@
 """
-frame_downloader.py — Tải frame border cho hero.
+BUST_downloader.py — Tải BUST border cho hero.
 
 Xử lý thêm hai trường hợp đặc biệt:
   1. Flowborn heroes → dùng gender suffix thay vì skin index
-  2. SPECIAL_FRAME   → file ID cứng, tải thẳng theo hero_id
+  2. SPECIAL_BUST   → file ID cứng, tải thẳng theo hero_id
 """
 
 from __future__ import annotations
@@ -11,23 +11,23 @@ from __future__ import annotations
 import os
 
 from modules.core.config import (
-    HEAD_URL, FRAME_DIR,
+    HEAD_URL, BUST_DIR,
     FLOWBORN_SPECIAL_HERO_ID,
-    FLOWBORN_GENDER_SUFFIX_FRAME,
-    SPECIAL_FRAME,
+    FLOWBORN_GENDER_SUFFIX_BUST,
+    SPECIAL_BUST,
 )
-from modules.core.id_builder import FrameIDBuilder
+from modules.core.id_builder import BustIDBuilder
 from modules.core.miss_counter import MissCounter
 from modules.downloaders.base_downloader import BaseAssetDownloader
 from modules.utils.http_client import HttpClient
 
 
-class FrameDownloader(BaseAssetDownloader):
-    """Tải frame border (.jpg) từ CDN."""
+class BustDownloader(BaseAssetDownloader):
+    """Tải BUST border (.jpg) từ CDN."""
 
     def __init__(self, http: HttpClient) -> None:
         super().__init__(http)
-        self._builder = FrameIDBuilder()
+        self._builder = BustIDBuilder()
 
     # ── Abstract implementations ──────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ class FrameDownloader(BaseAssetDownloader):
 
     @property
     def output_dir(self) -> str:
-        return FRAME_DIR
+        return BUST_DIR
 
     def build_id(self, hero_id: int, skin_index: int, evo5: bool = False) -> str:
         return self._builder.build(hero_id, skin_index, evo5)
@@ -55,10 +55,10 @@ class FrameDownloader(BaseAssetDownloader):
             self._download_flowborn(hero_id, hero_dir)
             return
 
-        # Special frames (file ID cứng)
-        self._download_special_frames(hero_id, hero_dir)
+        # Special BUSTs (file ID cứng)
+        self._download_special_BUSTs(hero_id, hero_dir)
 
-        # Frame thường — giống base template
+        # BUST thường — giống base template
         base_id = self.build_base_id(hero_id)
         result  = self._fetch(base_id, hero_dir)
         if result == "missing" and not os.path.exists(os.path.join(hero_dir, f"{base_id}.jpg")):
@@ -69,11 +69,11 @@ class FrameDownloader(BaseAssetDownloader):
     # ── Private helpers ───────────────────────────────────────────────────────
 
     def _download_flowborn(self, hero_id: int, hero_dir: str) -> None:
-        for gender in FLOWBORN_GENDER_SUFFIX_FRAME:
+        for gender in FLOWBORN_GENDER_SUFFIX_BUST:
             file_id = self._builder.build_flowborn(hero_id, gender)
             self._fetch(file_id, hero_dir)
 
-    def _download_special_frames(self, hero_id: int, hero_dir: str) -> None:
-        for file_id in SPECIAL_FRAME:
-            if FrameIDBuilder.parse_hero_id_from_special(file_id) == hero_id:
+    def _download_special_BUSTs(self, hero_id: int, hero_dir: str) -> None:
+        for file_id in SPECIAL_BUST:
+            if BustIDBuilder.parse_hero_id_from_special(file_id) == hero_id:
                 self._fetch(file_id, hero_dir)

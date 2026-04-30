@@ -12,26 +12,26 @@ from modules.core.config import MISS_LIMIT
 from modules.core.miss_counter import MissCounter
 from modules.downloaders.splash_downloader import SplashDownloader
 from modules.downloaders.head_downloader import HeadDownloader
-from modules.downloaders.frame_downloader import FrameDownloader
+from modules.downloaders.bust_downloader import BustDownloader
 
 
 class HeroProcessor:
     """
     Điều phối tải asset cho một hero theo mode được chọn.
 
-    mode: 'splash' | 'head' | 'frame' | 'all'
+    mode: 'splash' | 'head' | 'bust' | 'all'
     """
 
     def __init__(
         self,
         splash: SplashDownloader,
         head: HeadDownloader,
-        frame: FrameDownloader,
+        bust: BustDownloader,
         miss_limit: int = MISS_LIMIT,
     ) -> None:
         self._splash     = splash
         self._head       = head
-        self._frame      = frame
+        self._bust       = bust
         self._miss_limit = miss_limit
 
     def process(self, hero_id: int, mode: str) -> None:
@@ -40,5 +40,5 @@ class HeroProcessor:
             self._splash.process_hero(hero_id, MissCounter(self._miss_limit))
         if mode in ("head", "all"):
             self._head.process_hero(hero_id, MissCounter(self._miss_limit))
-        if mode in ("frame", "all"):
-            self._frame.process_hero(hero_id, MissCounter(self._miss_limit))
+        if mode in ("bust", "all"):
+            self._bust.process_hero(hero_id, MissCounter(self._miss_limit))

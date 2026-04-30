@@ -31,16 +31,16 @@ EVO5_SKIN_LIST: list[tuple[int, int]] = [
 # ── Flowborn heroes ───────────────────────────────────────────────────────────
 FLOWBORN_SPECIAL_HERO_ID    = [582, 584]
 FLOWBORN_UNIQUE_SUFFIX_ID   = "00"
-FLOWBORN_GENDER_SUFFIX_FRAME = ["m", "f"]
+FLOWBORN_GENDER_SUFFIX_BUST = ["m", "f"]
 
-# ── Special frames (raw file IDs) ─────────────────────────────────────────────
-SPECIAL_FRAME = ["301270_B51"]
+# ── Special BUSTs (raw file IDs) ─────────────────────────────────────────────
+SPECIAL_BUST = ["301270_B51"]
 
 # ── Output directories ────────────────────────────────────────────────────────
 OUTPUT_DIR  = "."
 SPLASH_DIR  = f"{OUTPUT_DIR}/splash"
 HEAD_DIR    = f"{OUTPUT_DIR}/head"
-FRAME_DIR   = f"{OUTPUT_DIR}/frame"
+BUST_DIR   = f"{OUTPUT_DIR}/bust"
 LOG_DIR     = f"{OUTPUT_DIR}/logs"
 
 # ── Threading ─────────────────────────────────────────────────────────────────
