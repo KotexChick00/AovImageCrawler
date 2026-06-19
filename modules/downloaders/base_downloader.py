@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
+import glob
 
 from modules.core.config import EVO5_SKIN_LIST, SUFFIX_RANGE
 from modules.core.miss_counter import MissCounter
@@ -55,8 +56,8 @@ class BaseAssetDownloader(ABC):
         base_id = self.build_base_id(hero_id)
         result  = self._fetch(base_id, hero_dir)
 
-        # Nếu skin 0 không tồn tại và cũng chưa có trên đĩa → hero không tồn tại
-        if result == "missing" and not os.path.exists(os.path.join(hero_dir, f"{base_id}.jpg")):
+        # Nếu skin 0 không tồn tại và cũng chưa có trên đĩa (bất kể đuôi) → hero không tồn tại
+        if result == "missing" and not glob.glob(os.path.join(hero_dir, f"{base_id}.*")):
             return
 
         self._download_skins(hero_id, hero_dir, miss_counter)
@@ -96,9 +97,11 @@ class BaseAssetDownloader(ABC):
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _fetch(self, file_id: str, save_dir: str) -> DownloadStatus:
-        url      = f"{self.base_url}{file_id}.jpg"
-        filename = f"{file_id}.jpg"
-        return self.http.download(url, save_dir, filename)
+        # URL nguồn luôn dùng .jpg (theo quy ước endpoint của server), nhưng nội
+        # dung trả về đôi khi thực chất là .png/.webp/... — HttpClient sẽ tự nhận
+        # diện định dạng thật và gán đúng đuôi khi lưu file.
+        url = f"{self.base_url}{file_id}.jpg"
+        return self.http.download(url, save_dir, file_id)
 
     @staticmethod
     def _is_evo5(hero_id: int, skin_index: int) -> bool:
