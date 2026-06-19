@@ -25,13 +25,13 @@
 
 ## 🇻🇳 Tiếng Việt
 
-Tool tải splash art, head icon và frame của tướng trong **Arena of Valor (AoV)** từ server Garena 傳說對決.
+Tool tải splash art, head icon và bust của tướng trong **Arena of Valor (AoV)** từ server Garena 傳說對決.
 
 ### Tính năng
 
 - Tải **splash art** (ảnh loading) của tất cả tướng và skin
 - Tải **head icon** (ảnh đầu tướng) của tất cả tướng và skin
-- Tải **frame** (khung avatar) của tất cả tướng và skin
+- Tải **bust** (khung avatar) của tất cả tướng và skin
 - Bỏ qua file đã tải, không tải lại
 - Ghi log mỗi phiên tải vào thư mục `logs/`
 - Tự động dừng khi gặp skin không tồn tại (miss limit)
@@ -52,7 +52,7 @@ Tải file `.exe` mới nhất tại trang [Releases](https://github.com/KotexCh
   Chọn chế độ tải:
   1. splash  — chỉ tải splash
   2. head    — chỉ tải head
-  3. frame   — chỉ tải frame
+  3. bust   — chỉ tải bust
   4. all     — tải tất cả (mặc định)
 ========================================
 ```
@@ -65,7 +65,7 @@ Tải file `.exe` mới nhất tại trang [Releases](https://github.com/KotexCh
 │   └── 📁 {hero_id}/
 ├── 📁 head/
 │   └── 📁 {hero_id}/
-├── 📁 frame/
+├── 📁 bust/
 │   └── 📁 {hero_id}/
 └── 📁 logs/
     ├── download.log
@@ -88,13 +88,13 @@ python main.py
 
 ## 🇬🇧 English
 
-Tool to download splash art, head icons and frames of heroes in **Arena of Valor (AoV)** from the Garena 傳說對決 server.
+Tool to download splash art, head icons and busts of heroes in **Arena of Valor (AoV)** from the Garena 傳說對決 server.
 
 ### Features
 
 - Download **splash art** (loading screen images) for all heroes and skins
 - Download **head icons** for all heroes and skins
-- Download **frames** (avatar borders) for all heroes and skins
+- Download **bust** (avatar borders) for all heroes and skins
 - Skips already downloaded files
 - Writes a session log to the `logs/` folder after each run
 - Automatically stops when missing skins exceed the miss limit
@@ -115,7 +115,7 @@ Get the latest `.exe` from the [Releases](https://github.com/KotexChick00/AovIma
   Chọn chế độ tải:
   1. splash  — chỉ tải splash
   2. head    — chỉ tải head
-  3. frame   — chỉ tải frame
+  3. bust   — chỉ tải bust
   4. all     — tải tất cả (mặc định)
 ========================================
 ```
@@ -128,7 +128,7 @@ Get the latest `.exe` from the [Releases](https://github.com/KotexChick00/AovIma
 │   └── 📁 {hero_id}/
 ├── 📁 head/
 │   └── 📁 {hero_id}/
-├── 📁 frame/
+├── 📁 bust/
 │   └── 📁 {hero_id}/
 └── 📁 logs/
     ├── download.log
