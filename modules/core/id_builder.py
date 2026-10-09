@@ -24,6 +24,9 @@ class BaseIDBuilder(ABC):
     @abstractmethod
     def build_base(self, hero_id: int) -> str: ...
 
+    @abstractmethod
+    def build_filename(self, hero_name: str, hero_id: int, skin_index: int, evo5: bool = False) -> str: ...
+
 
 class SplashIDBuilder(BaseIDBuilder):
     """
@@ -31,6 +34,8 @@ class SplashIDBuilder(BaseIDBuilder):
     Ví dụ:
         hero=196, skin=2        → 19602
         hero=196, skin=2, evo5  → 19602_2
+    
+    New filename format: Hero_Splash_{HeroName}_{HeroID}_{SkinID}
     """
 
     def build(self, hero_id: int, skin_index: int, evo5: bool = False) -> str:
@@ -40,9 +45,16 @@ class SplashIDBuilder(BaseIDBuilder):
     def build_base(self, hero_id: int) -> str:
         return self.build(hero_id, 0)
 
+    def build_filename(self, hero_name: str, hero_id: int, skin_index: int, evo5: bool = False) -> str:
+        evo_suffix = EVO5_ALT_SUFFIX if evo5 else ""
+        return f"Hero_Splash_{hero_name}_{hero_id}_{skin_index}{evo_suffix}"
+
     def build_b_variant(self, hero_id: int, b_suffix: int) -> str:
         """B-suffix variant: {hero_id}00_B{b_suffix}"""
         return f"{hero_id}00_B{b_suffix}"
+
+    def build_b_filename(self, hero_name: str, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        return f"Hero_Splash_{hero_name}_{hero_id}_{skin_index}_B{b_suffix}"
 
 
 class HeadIDBuilder(BaseIDBuilder):
@@ -53,6 +65,8 @@ class HeadIDBuilder(BaseIDBuilder):
         hero=196, skin=0        → 301960head
         hero=196, skin=2        → 301962head
         hero=196, skin=2, evo5  → 301962_2head
+    
+    New filename format: Hero_Head_{HeroName}_{HeroID}_{SkinID}
     """
 
     def build(self, hero_id: int, skin_index: int, evo5: bool = False) -> str:
@@ -63,6 +77,17 @@ class HeadIDBuilder(BaseIDBuilder):
     def build_base(self, hero_id: int) -> str:
         return self.build(hero_id, 0)
 
+    def build_filename(self, hero_name: str, hero_id: int, skin_index: int, evo5: bool = False) -> str:
+        evo_suffix = EVO5_ALT_SUFFIX if evo5 else ""
+        return f"Hero_Head_{hero_name}_{hero_id}_{skin_index}{evo_suffix}"
+
+    def build_b_variant(self, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        """B-variant: 30{hero_id}{skin_index}head_B{b_suffix} (vd: 301270head_B51)"""
+        return f"{self.build(hero_id, skin_index)}_B{b_suffix}"
+
+    def build_b_filename(self, hero_name: str, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        return f"Hero_Head_{hero_name}_{hero_id}_{skin_index}_B{b_suffix}"
+
 
 class BustIDBuilder(BaseIDBuilder):
     """
@@ -71,6 +96,8 @@ class BustIDBuilder(BaseIDBuilder):
     Ví dụ:
         hero=196, skin=2        → 301962
         hero=196, skin=2, evo5  → 301962_2
+    
+    New filename format: Hero_Bust_{HeroName}_{HeroID}_{SkinID}
     """
 
     def build(self, hero_id: int, skin_index: int, evo5: bool = False) -> str:
@@ -81,23 +108,21 @@ class BustIDBuilder(BaseIDBuilder):
     def build_base(self, hero_id: int) -> str:
         return self.build(hero_id, 0)
 
+    def build_filename(self, hero_name: str, hero_id: int, skin_index: int, evo5: bool = False) -> str:
+        evo_suffix = EVO5_ALT_SUFFIX if evo5 else ""
+        return f"Hero_Bust_{hero_name}_{hero_id}_{skin_index}{evo_suffix}"
+
+    def build_b_variant(self, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        """B-variant: 30{hero_id}{skin_index}_B{b_suffix} (vd: 301270_B51)"""
+        return f"{self.build(hero_id, skin_index)}_B{b_suffix}"
+
+    def build_b_filename(self, hero_name: str, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        return f"Hero_Bust_{hero_name}_{hero_id}_{skin_index}_B{b_suffix}"
+
     def build_flowborn(self, hero_id: int, gender: str) -> str:
         """Flowborn bust ID: 30{hero_id}{FLOWBORN_UNIQUE_SUFFIX_ID}{gender}"""
         return f"{HEAD_REQUIRED_PREFIX}{hero_id}{FLOWBORN_UNIQUE_SUFFIX_ID}{gender}"
 
-    @staticmethod
-    def parse_hero_id_from_special(file_id: str) -> int | None:
-        """
-        Lấy hero_id từ file_id đặc biệt trong SPECIAL_BUST.
-        Quy tắc: bỏ prefix '30', lấy chuỗi số, bỏ chữ số cuối (skin=0).
-        Ví dụ: '301270_B51' → '30' bỏ → '1270' → hero_id=127
-        """
-        import re
-        without_prefix = file_id[len(HEAD_REQUIRED_PREFIX):]
-        m = re.match(r"(\d+)", without_prefix)
-        if not m:
-            return None
-        digits = m.group(1)
-        if len(digits) < 2:
-            return None
-        return int(digits[:-1])
+    def build_flowborn_filename(self, hero_name: str, hero_id: int, gender: str) -> str:
+        """Flowborn filename: Hero_Bust_{HeroName}_{HeroID}_{gender}"""
+        return f"Hero_Bust_{hero_name}_{hero_id}_{gender}"

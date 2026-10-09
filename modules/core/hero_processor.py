@@ -34,11 +34,11 @@ class HeroProcessor:
         self._bust       = bust
         self._miss_limit = miss_limit
 
-    def process(self, hero_id: int, mode: str) -> None:
+    def process(self, hero_id: int, hero_name: str, mode: str) -> None:
         """Tải tất cả asset cần thiết cho hero_id theo mode."""
         if mode in ("splash", "all"):
-            self._splash.process_hero(hero_id, MissCounter(self._miss_limit))
+            self._splash.process_hero(hero_id, hero_name, MissCounter(self._miss_limit))
         if mode in ("head", "all"):
-            self._head.process_hero(hero_id, MissCounter(self._miss_limit))
+            self._head.process_hero(hero_id, hero_name, MissCounter(self._miss_limit))
         if mode in ("bust", "all"):
-            self._bust.process_hero(hero_id, MissCounter(self._miss_limit))
+            self._bust.process_hero(hero_id, hero_name, MissCounter(self._miss_limit))

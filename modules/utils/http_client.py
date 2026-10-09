@@ -15,6 +15,8 @@ from typing import Literal
 
 import requests
 
+from modules.core.config import DUPLICATE_CHECK
+
 
 # ── Mime / extension detection ────────────────────────────────────────────────
 
@@ -103,27 +105,52 @@ session_tracker = SessionTracker()
 class HttpClient:
     """
     Tải một file từ URL về đĩa.
-    - Bỏ qua nếu file đã tồn tại.
+    - Bỏ qua nếu URL đã từng tải (theo downloaded_urls.txt) hoặc file đã tồn tại.
     - Ghi persistent log và cập nhật session tracker khi tải thành công.
     """
 
-    def __init__(self, log_dir: str, timeout: int = 10) -> None:
+    def __init__(self, log_dir: str, timeout: int = 10, check_mode: str | None = None) -> None:
         self.log_dir = log_dir
         self.timeout = timeout
+        self._check_mode = check_mode or DUPLICATE_CHECK
+        if self._check_mode not in ("disk", "url"):
+            raise ValueError(f"DUPLICATE_CHECK phải là 'disk' hoặc 'url', không phải {self._check_mode!r}")
+        self._log_lock      = threading.Lock()
+        self._manifest_lock = threading.Lock()
+        self._manifest_path = os.path.join(log_dir, "downloaded_urls.txt")
+        self._downloaded_urls: set[str] = (
+            self._load_manifest() if self._check_mode == "url" else set()
+        )
 
     # ── Public ────────────────────────────────────────────────────────────────
 
-    def download(self, url: str, save_dir: str, file_id: str) -> DownloadStatus:
+    def download(
+        self, url: str, save_dir: str, file_id: str, quiet_missing: bool = False
+    ) -> DownloadStatus:
         """
         Tải url, tự động nhận diện định dạng thực tế (qua Content-Type / magic bytes)
         để gán đuôi file đúng (.jpg/.png/...).
+
+        `quiet_missing=True`: không in dòng "Not found" khi server trả 404
+        (dùng cho các lần quét dò B-suffix, nơi phần lớn request đều miss).
 
         `file_id` KHÔNG kèm đuôi file — đuôi sẽ được xác định sau khi tải về.
         Việc kiểm tra "đã tồn tại" được thực hiện bằng cách tìm mọi file có tên
         `{file_id}.*` trong `save_dir`, bất kể đuôi thật là gì.
         """
+        # Chế độ "url": đã từng tải URL này (kể cả khi file đã bị đổi tên / di chuyển)
+        if self._check_mode == "url":
+            with self._manifest_lock:
+                already = url in self._downloaded_urls
+            if already:
+                print(f"Already downloaded: {url}")
+                return "exists"
+
+        # File còn nguyên tên `{file_id}.*` trên đĩa (cả hai chế độ đều kiểm tra bước này)
         existing = self._find_existing(save_dir, file_id)
         if existing is not None:
+            if self._check_mode == "url":
+                self._remember_url(url)   # lần sau không phụ thuộc tên file nữa
             print(f"Already exists: {existing}")
             return "exists"
 
@@ -134,7 +161,8 @@ class HttpClient:
             return "missing"
 
         if response.status_code != 200:
-            print(f"Not found: {url}")
+            if not quiet_missing:
+                print(f"Not found: {url}")
             return "missing"
 
         ext = _detect_extension(
@@ -148,6 +176,7 @@ class HttpClient:
             f.write(response.content)
 
         print(f"Downloaded: {file_path}")
+        self._remember_url(url)
         self._append_persistent_log(file_path)
         session_tracker.record(file_path)
         return "downloaded"
@@ -160,9 +189,29 @@ class HttpClient:
         matches = sorted(glob.glob(os.path.join(save_dir, f"{file_id}.*")))
         return matches[0] if matches else None
 
+    def _load_manifest(self) -> set[str]:
+        """Đọc danh sách URL đã tải (mỗi dòng một URL)."""
+        try:
+            with open(self._manifest_path, "r", encoding="utf-8") as f:
+                return {line.strip() for line in f if line.strip()}
+        except FileNotFoundError:
+            return set()
+
+    def _remember_url(self, url: str) -> None:
+        """Thêm URL vào manifest (thread-safe, ghi nối tiếp ra file). Chỉ dùng ở chế độ "url"."""
+        if self._check_mode != "url":
+            return
+        with self._manifest_lock:
+            if url in self._downloaded_urls:
+                return
+            self._downloaded_urls.add(url)
+            os.makedirs(self.log_dir, exist_ok=True)
+            with open(self._manifest_path, "a", encoding="utf-8") as f:
+                f.write(f"{url}\n")
+
     def _append_persistent_log(self, file_path: str) -> None:
         os.makedirs(self.log_dir, exist_ok=True)
         log_path = os.path.join(self.log_dir, "download.log")
-        with threading.Lock():                     # file-level lock (best-effort)
-            with open(log_path, "a") as f:
+        with self._log_lock:
+            with open(log_path, "a", encoding="utf-8") as f:
                 f.write(f"{file_path}\n")

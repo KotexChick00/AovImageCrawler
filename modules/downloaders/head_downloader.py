@@ -30,3 +30,6 @@ class HeadDownloader(BaseAssetDownloader):
 
     def build_base_id(self, hero_id: int) -> str:
         return self._builder.build_base(hero_id)
+
+    def build_b_id(self, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        return self._builder.build_b_variant(hero_id, skin_index, b_suffix)
