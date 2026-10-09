@@ -6,6 +6,7 @@ và ghi session log khi hoàn tất.
 
 Menu có thêm:
   - đổi tên file đã tải (modules/utils/renamer.py) — chạy riêng hoặc ngay sau khi tải
+  - cập nhật app (.exe) và hero.json từ GitHub (modules/utils/updater.py)
   - báo lỗi của các luồng worker ở cuối phiên (trước đây bị nuốt im lặng)
 """
 
@@ -18,13 +19,13 @@ from datetime import datetime
 
 from modules.core.config import (
     SPLASH_DIR, HEAD_DIR, BUST_DIR, LOG_DIR,
-    HERO_WORKERS, HERO_NAME_MAP,
+    HERO_WORKERS, HERO_NAME_MAP, APP_VERSION,
 )
 from modules.core.hero_processor import HeroProcessor
 from modules.downloaders.splash_downloader import SplashDownloader
 from modules.downloaders.head_downloader import HeadDownloader
 from modules.downloaders.bust_downloader import BustDownloader
-from modules.utils import renamer
+from modules.utils import renamer, updater
 from modules.utils.http_client import HttpClient
 from modules.utils.logger import SessionLogger
 
@@ -35,6 +36,7 @@ MODES = {
     "4": "all",
     "5": "rename",        # chỉ đổi tên file đã tải
     "6": "all+rename",    # tải tất cả rồi đổi tên
+    "7": "update",        # kiểm tra cập nhật app + hero.json từ GitHub
 }
 DOWNLOAD_MODES = {"splash", "head", "bust", "all"}
 
@@ -43,6 +45,7 @@ DOWNLOAD_MODES = {"splash", "head", "bust", "all"}
 
 def select_mode() -> str:
     print("=" * 40)
+    print(f"  AoV Image Crawler v{APP_VERSION}")
     print("  Chọn chế độ:")
     print("  1. splash      — chỉ tải splash")
     print("  2. head        — chỉ tải head")
@@ -50,8 +53,9 @@ def select_mode() -> str:
     print("  4. all         — tải tất cả (mặc định)")
     print("  5. rename      — đổi tên file đã tải")
     print("  6. all+rename  — tải tất cả rồi đổi tên")
+    print("  7. update      — kiểm tra cập nhật (app + hero.json)")
     print("=" * 40)
-    choice = input("Nhập lựa chọn [1-6], Enter để chọn all: ").strip()
+    choice = input("Nhập lựa chọn [1-7], Enter để chọn all: ").strip()
     mode = MODES.get(choice, "all")
     print(f"→ Chế độ: {mode}\n")
     return mode
@@ -132,6 +136,10 @@ def run_rename(preview_first: bool) -> None:
 
 
 def main() -> None:
+    # Tự kiểm tra cập nhật khi mở app (im lặng nếu đã mới nhất / chưa cấu hình / offline)
+    if updater.startup_check(ask_yes_no):
+        return                       # script cập nhật đã chạy → thoát để thay file
+
     mode = select_mode()
 
     if mode in DOWNLOAD_MODES:
@@ -142,6 +150,9 @@ def main() -> None:
         run_rename(preview_first=False)
     elif mode == "rename":
         run_rename(preview_first=True)
+    elif mode == "update":
+        print("── Kiểm tra cập nhật ──")
+        updater.run_checks(ask_yes_no, verbose=True)
 
 
 if __name__ == "__main__":

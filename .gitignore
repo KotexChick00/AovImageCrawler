@@ -12,5 +12,6 @@ head/
 logs/
 splash/
 Texture2D/
+modules/core/_version.py
 
 !requirements.txt

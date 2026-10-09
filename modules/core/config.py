@@ -44,6 +44,19 @@ FLOWBORN_SPECIAL_HERO_ID    = [582, 584]
 FLOWBORN_UNIQUE_SUFFIX_ID   = "00"
 FLOWBORN_GENDER_SUFFIX_BUST = ["m", "f"]
 
+# ── Cập nhật từ GitHub ────────────────────────────────────────────────────────
+# APP_VERSION do bước build ghi vào modules/core/_version.py (lấy từ tag Git, vd v1.0.1).
+# Chạy từ mã nguồn khi chưa build thì dùng "0.0.0-dev".
+try:
+    from modules.core._version import __version__ as APP_VERSION
+except ImportError:
+    APP_VERSION = "0.0.0-dev"
+GITHUB_REPO           = "KotexChick00/AovImageCrawler"   # ← ĐỔI thành "chủ-repo/tên-repo"
+GITHUB_BRANCH         = "main"                  # nhánh chứa hero.json
+HERO_JSON_PATH_IN_REPO = "hero.json"
+EXE_ASSET_NAME        = "AoV Image Crawler.exe" # tên file .exe đính kèm trong release
+UPDATE_CHECK_ON_START = True                    # tự kiểm tra khi mở app
+
 # ── Output directories ────────────────────────────────────────────────────────
 OUTPUT_DIR  = "."
 SPLASH_DIR  = f"{OUTPUT_DIR}/splash"
@@ -72,6 +85,21 @@ def _hero_json_candidates() -> list[str]:
     paths.append(os.path.join(os.getcwd(), "hero.json"))          # thư mục đang chạy
     paths.append(os.path.join(here, "../../hero.json"))           # layout mã nguồn gốc
     return [os.path.normpath(p) for p in paths]
+
+
+def find_hero_json() -> str | None:
+    """Đường dẫn hero.json đầu tiên tồn tại (hoặc None)."""
+    for path in _hero_json_candidates():
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def default_hero_json_path() -> str:
+    """Nơi ghi hero.json khi chưa có: cạnh file .exe (bản đóng gói) hoặc thư mục đang chạy."""
+    if getattr(sys, "frozen", False):
+        return os.path.join(os.path.dirname(sys.executable), "hero.json")
+    return os.path.join(os.getcwd(), "hero.json")
 
 
 def _load_hero_data() -> dict[int, str]:
