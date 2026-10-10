@@ -44,7 +44,7 @@ jobs:
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v3
         with:
-          files: "dist/AoV Image Crawler.exe"
+          files: "dist/AoVImageCrawler.exe"
           generate_release_notes: true
           overwrite_files: true
           fail_on_unmatched_files: true
