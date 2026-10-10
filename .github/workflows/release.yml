@@ -4,14 +4,18 @@ on:
   push:
     tags:
       - 'v*' # Kích hoạt khi bạn push tag (v1.0, v2.0...)
-      
+
 permissions:
   contents: write
 
 jobs:
   build:
     runs-on: windows-latest
-    
+
+    env:
+      # Tùy chọn: tạo secret này để bật ký số (xem tools/make-signing-cert.ps1). Không có thì bỏ qua bước ký.
+      SIGN_PFX_BASE64: ${{ secrets.SIGN_PFX_BASE64 }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -28,23 +32,50 @@ jobs:
           # Tự động cài thư viện nếu bạn có file requirements.txt
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
+      # MỚI: ghi số phiên bản (lấy từ tag) vào file mà config.py đọc. Phải chạy TRƯỚC khi build.
+      - name: Write version from tag
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart("v")
+          if ($v -notmatch '^\d+(\.\d+)*$') { throw "Tag '${{ github.ref_name }}' không đúng dạng v1.2.3" }
+          Set-Content -Path modules/core/_version.py -Value "__version__ = `"$v`"" -Encoding ascii
+          Write-Host "Phiên bản build: $v"
+
       - name: Build EXE with PyInstaller
         run: |
-          # Sử dụng chính xác lệnh bạn đã cung cấp
           pyinstaller --onefile .\main.py --icon icon.ico --name "AoV Image Crawler"
 
-      - name: Delete existing release asset (if any)
-        shell: bash
-        run: |
-          gh release delete-asset "${{ github.ref_name }}" "AoV Image Crawler.exe" --yes 2>/dev/null || true
-          echo "Asset cleanup done."
+      # MỚI (tùy chọn): ký số exe. Chỉ chạy khi đã tạo secret SIGN_PFX_BASE64 + SIGN_PFX_PASSWORD.
+      - name: Sign EXE
+        if: ${{ env.SIGN_PFX_BASE64 != '' }}
+        shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SIGN_PFX_PASSWORD: ${{ secrets.SIGN_PFX_PASSWORD }}
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGN_PFX_BASE64))
+          try {
+            $pw = ConvertTo-SecureString $env:SIGN_PFX_PASSWORD -AsPlainText -Force
+            ./tools/sign.ps1 -File "dist/AoV Image Crawler.exe" -PfxPath $pfx -PfxPassword $pw
+          } finally {
+            Remove-Item $pfx -Force -ErrorAction SilentlyContinue
+          }
+
+      # MỚI: checksum để app xác minh file tải về. Tính SAU khi ký (ký làm đổi nội dung file).
+      - name: Create checksum
+        shell: pwsh
+        run: |
+          $exe = "dist/AoV Image Crawler.exe"
+          $h = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          Set-Content -Path "$exe.sha256" -Value "$h  AoV Image Crawler.exe" -Encoding ascii
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v3
         with:
-          files: "dist/AoVImageCrawler.exe"
+          # SỬA: tên file phải khớp --name "AoV Image Crawler" ở bước build (trước đây là AoVImageCrawler.exe)
+          files: |
+            dist/AoV Image Crawler.exe
+            dist/AoV Image Crawler.exe.sha256
           generate_release_notes: true
           overwrite_files: true
           fail_on_unmatched_files: true
