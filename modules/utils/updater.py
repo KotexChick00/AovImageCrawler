@@ -24,6 +24,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
+import time
 from dataclasses import dataclass
 from typing import Callable
 
@@ -147,29 +149,61 @@ def fetch_latest_release() -> ReleaseInfo:
 
 # ── Tải & xác minh ────────────────────────────────────────────────────────────
 
-def download_file(url: str, dest: str, expected_size: int | None = None) -> None:
+def download_file(
+    url: str, dest: str, expected_size: int | None = None, retries: int = 4
+) -> None:
+    """Tải file; nếu mất kết nối giữa chừng thì thử lại và tiếp tục từ chỗ đứt (HTTP Range)."""
     _require_repo_url(url)
     part = dest + ".part"
-    try:
-        with requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT) as r:
-            r.raise_for_status()
-            total = int(r.headers.get("Content-Length") or expected_size or 0)
-            done, last = 0, -1
-            with open(part, "wb") as f:
-                for chunk in r.iter_content(chunk_size=1 << 16):
-                    if not chunk:
-                        continue
-                    f.write(chunk)
-                    done += len(chunk)
-                    if total:
-                        pct = done * 100 // total
-                        if pct != last and pct % 5 == 0:
-                            print(f"\r  Đang tải... {pct}%", end="", flush=True)
-                            last = pct
-        print()
-    except (requests.RequestException, OSError) as exc:
+    _silent_remove(part)
+    last_error = ""
+
+    for attempt in range(1, retries + 1):
+        done = os.path.getsize(part) if os.path.exists(part) else 0
+        headers = {"Range": f"bytes={done}-"} if done else {}
+        try:
+            with requests.get(url, stream=True, headers=headers, timeout=DOWNLOAD_TIMEOUT) as r:
+                if r.status_code == 416 and expected_size and done >= expected_size:
+                    break                                    # đã đủ dữ liệu từ lần trước
+                r.raise_for_status()
+                if done and r.status_code == 206:
+                    mode = "ab"                              # server hỗ trợ Range → nối tiếp
+                else:
+                    mode, done = "wb", 0                     # server trả lại từ đầu
+                remaining = int(r.headers.get("Content-Length") or 0)
+                total = expected_size or (done + remaining)
+                last = -1
+                with open(part, mode) as f:
+                    for chunk in r.iter_content(chunk_size=1 << 16):
+                        if not chunk:
+                            continue
+                        f.write(chunk)
+                        done += len(chunk)
+                        if total:
+                            pct = done * 100 // total
+                            if pct != last and pct % 5 == 0:
+                                print(f"\r  Đang tải... {pct}%", end="", flush=True)
+                                last = pct
+                print()
+            break                                            # thành công
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else 0
+            if 0 < status < 500:                             # lỗi phía client: thử lại cũng vô ích
+                _silent_remove(part)
+                raise UpdateError(f"máy chủ trả về HTTP {status}") from exc
+            last_error = f"HTTP {status}"
+        except requests.RequestException as exc:             # ngắt kết nối, timeout, đọc thiếu...
+            last_error = type(exc).__name__
+        except OSError as exc:
+            _silent_remove(part)
+            raise UpdateError(f"không ghi được file ({exc})") from exc
+
+        if attempt < retries:
+            print(f"\n  Mất kết nối ({last_error}), thử lại {attempt}/{retries - 1} (tiếp tục từ chỗ đã tải)...")
+            time.sleep(min(2 ** attempt, 8))
+    else:
         _silent_remove(part)
-        raise UpdateError(f"tải file thất bại ({type(exc).__name__}: {exc})") from exc
+        raise UpdateError(f"tải thất bại sau {retries} lần thử ({last_error})")
 
     if expected_size and os.path.getsize(part) != expected_size:
         _silent_remove(part)
@@ -251,12 +285,20 @@ def apply_exe_update(new_exe: str) -> None:
     subprocess.Popen(["cmd.exe", "/c", script], creationflags=flags, close_fds=True)
 
 
-def _print_notes(notes: str, max_lines: int = 12) -> None:
-    lines = [ln.rstrip() for ln in notes.splitlines() if ln.strip()]
-    for ln in lines[:max_lines]:
-        print(f"    {ln[:100]}")
-    if len(lines) > max_lines:
-        print("    ...")
+def _print_notes(notes: str, max_lines: int = 16) -> None:
+    """In ghi chú phát hành gọn: chỉ phần trước dòng '---' (bản tiếng Việt), bỏ ký hiệu markdown."""
+    section = re.split(r"^\s*---\s*$", notes, maxsplit=1, flags=re.M)[0]
+    shown = 0
+    for raw in section.splitlines():
+        if not raw.strip() or "Full Changelog" in raw:
+            continue
+        text = re.sub(r"^#+\s*", "", raw.strip()).replace("**", "").replace("`", "")
+        for piece in textwrap.wrap(text, width=92, subsequent_indent="  ") or [""]:
+            if shown >= max_lines:
+                print("    ...")
+                return
+            print(f"    {piece}")
+            shown += 1
 
 
 def update_app(ask: AskFn, verbose: bool = True) -> bool:
@@ -282,10 +324,17 @@ def update_app(ask: AskFn, verbose: bool = True) -> bool:
     if not info.exe_url:
         print(f"  Release không đính kèm file .exe. Xem: {info.page_url}")
         return False
+    if not any(current):
+        print("  ! Bản đang chạy không có số phiên bản (0.0.0-dev): được build mà không qua build.ps1 / workflow.")
     if not ask("  Cập nhật ngay?", False):
         return False
 
-    new_exe = stage_exe_update(info)
+    try:
+        new_exe = stage_exe_update(info)
+    except UpdateError as exc:
+        print(f"  Tải bản cập nhật thất bại: {exc}")
+        print(f"  Thử lại sau, hoặc tải thủ công tại: {info.page_url}")
+        return False
     apply_exe_update(new_exe)
     print("  Đang khởi động lại để hoàn tất cập nhật...")
     return True
