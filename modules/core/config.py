@@ -20,7 +20,7 @@ EVO5_ALT_SUFFIX           = "_2"
 
 # ── Scan ranges ───────────────────────────────────────────────────────────────
 SUFFIX_RANGE   = range(100)       # skin index 00–99
-B_SUFFIX_RANGE = range(36, 100)   # B36–B99 (splash only)
+B_SUFFIX_RANGE = range(36, 100)   # B36–B99
 
 # ── Cách kiểm tra "đã tải chưa" ───────────────────────────────────────────────
 # "disk": file {file_id}.* còn trên đĩa là đã tải (cách cũ). Xóa file → tự tải lại.
@@ -48,13 +48,13 @@ FLOWBORN_GENDER_SUFFIX_BUST = ["m", "f"]
 # APP_VERSION do bước build ghi vào modules/core/_version.py (lấy từ tag Git, vd v1.0.1).
 # Chạy từ mã nguồn khi chưa build thì dùng "0.0.0-dev".
 try:
-    from modules.core._version import __version__ as APP_VERSION
+    from modules.core._version import __version__ as APP_VERSION  # pyright: ignore[reportMissingImports]
 except ImportError:
     APP_VERSION = "0.0.0-dev"
-GITHUB_REPO           = "KotexChick00/AovImageCrawler"   # ← ĐỔI thành "chủ-repo/tên-repo"
+GITHUB_REPO           = "KotexChick00/AovImageCrawler"   # "chủ-repo/tên-repo"
 GITHUB_BRANCH         = "main"                  # nhánh chứa hero.json
 HERO_JSON_PATH_IN_REPO = "hero.json"
-EXE_ASSET_NAME        = "AoV Image Crawler.exe" # tên file .exe đính kèm trong release
+EXE_ASSET_NAME        = "AoVImageCrawler.exe"   # tên file .exe đính kèm trong release
 UPDATE_CHECK_ON_START = True                    # tự kiểm tra khi mở app
 
 # ── Output directories ────────────────────────────────────────────────────────
