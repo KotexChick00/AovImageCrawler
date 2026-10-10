@@ -130,23 +130,6 @@ pip install -r requirements.txt
 python main.py
 ```
 
-**Đổi tên file đã tải (không qua menu):**
-
-```bash
-python -m modules.utils.renamer --dry-run   # xem trước
-python -m modules.utils.renamer             # đổi thật
-```
-
-**Build và phát hành:** số phiên bản lấy từ **tag Git**, không cần sửa tay.
-
-```powershell
-# Cách 1: GitHub Actions tự build và phát hành khi đẩy tag
-git tag v1.2.0
-git push origin v1.2.0
-
-# Cách 2: build trên máy (thêm -Release để phát hành, cần GitHub CLI)
-.\build.ps1 -Version 1.2.0
-```
 
 ---
 
@@ -259,23 +242,6 @@ pip install -r requirements.txt
 python main.py
 ```
 
-**Rename downloaded files (without the menu):**
-
-```bash
-python -m modules.utils.renamer --dry-run   # preview
-python -m modules.utils.renamer             # rename for real
-```
-
-**Build and release:** the version number comes from the **Git tag**, no manual edits needed.
-
-```powershell
-# Option 1: GitHub Actions builds and publishes when a tag is pushed
-git tag v1.2.0
-git push origin v1.2.0
-
-# Option 2: build locally (add -Release to publish, requires GitHub CLI)
-.\build.ps1 -Version 1.2.0
-```
 
 ---
 
