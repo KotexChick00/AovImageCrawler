@@ -43,7 +43,7 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          pyinstaller --onefile .\main.py --icon icon.ico --name "AoV Image Crawler"
+          pyinstaller --onefile .\main.py --icon icon.ico --name "AoV.Image.Crawler"
 
       # MỚI (tùy chọn): ký số exe. Chỉ chạy khi đã tạo secret SIGN_PFX_BASE64 + SIGN_PFX_PASSWORD.
       - name: Sign EXE
@@ -56,7 +56,7 @@ jobs:
           [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGN_PFX_BASE64))
           try {
             $pw = ConvertTo-SecureString $env:SIGN_PFX_PASSWORD -AsPlainText -Force
-            ./tools/sign.ps1 -File "dist/AoV Image Crawler.exe" -PfxPath $pfx -PfxPassword $pw
+            ./tools/sign.ps1 -File "dist/AoV.Image.Crawler.exe" -PfxPath $pfx -PfxPassword $pw
           } finally {
             Remove-Item $pfx -Force -ErrorAction SilentlyContinue
           }
@@ -65,17 +65,17 @@ jobs:
       - name: Create checksum
         shell: pwsh
         run: |
-          $exe = "dist/AoV Image Crawler.exe"
+          $exe = "dist/AoV.Image.Crawler.exe"
           $h = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
-          Set-Content -Path "$exe.sha256" -Value "$h  AoV Image Crawler.exe" -Encoding ascii
+          Set-Content -Path "$exe.sha256" -Value "$h  AoV.Image.Crawler.exe" -Encoding ascii
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v3
         with:
-          # SỬA: tên file phải khớp --name "AoV Image Crawler" ở bước build (trước đây là AoVImageCrawler.exe)
+          # SỬA: tên file phải khớp --name "AoV.Image.Crawler" ở bước build (trước đây là AoVImageCrawler.exe)
           files: |
-            dist/AoV Image Crawler.exe
-            dist/AoV Image Crawler.exe.sha256
+            dist/AoV.Image.Crawler.exe
+            dist/AoV.Image.Crawler.exe.sha256
           generate_release_notes: true
           overwrite_files: true
           fail_on_unmatched_files: true
