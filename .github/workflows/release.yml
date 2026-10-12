@@ -72,6 +72,13 @@ jobs:
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v3
         with:
+          # Phần body được đặt TRƯỚC ghi chú tự sinh (generate_release_notes) bên dưới.
+          # Dòng này là nội dung SignPath Foundation yêu cầu phải có ở trang tải về.
+          body: |
+            Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+            See the [Code signing policy](https://github.com/KotexChick00/AovImageCrawler#code-signing-policy).
+
+            SHA-256 checksum: see the `.sha256` file attached to this release.
           # SỬA: tên file phải khớp --name "AoV.Image.Crawler" ở bước build (trước đây là AoVImageCrawler.exe)
           files: |
             dist/AoV.Image.Crawler.exe
