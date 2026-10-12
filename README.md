@@ -52,7 +52,7 @@ Tải file `.exe` mới nhất tại trang [Releases](https://github.com/KotexCh
 
 ```
 ========================================
-  AoV Image Crawler v1.2.0
+  AoV Image Crawler vx.x.x
   Chọn chế độ:
   1. splash      — chỉ tải splash
   2. head        — chỉ tải head
@@ -63,6 +63,8 @@ Tải file `.exe` mới nhất tại trang [Releases](https://github.com/KotexCh
   7. update      — kiểm tra cập nhật (app + hero.json)
 ========================================
 ```
+
+Sau mỗi lần chạy, app hỏi có muốn chạy chế độ khác không và chờ bạn nhấn Enter trước khi đóng, nên cửa sổ không tự thoát.
 
 4. Ảnh sẽ được lưu vào các thư mục tương ứng:
 
@@ -131,6 +133,42 @@ python main.py
 ```
 
 
+### Lưu ý pháp lý
+
+AoV Image Crawler là công cụ độc lập, **không liên kết, không được tài trợ hay chứng nhận bởi Garena, Level Infinite, Tencent, TIMi Studio Group** hoặc bất kỳ chủ sở hữu nào của Arena of Valor. Tên game, tên tướng và hình ảnh thuộc về chủ sở hữu của chúng. Repo này **không chứa sẵn tài nguyên game**: ảnh chỉ được tải về máy của bạn khi bạn chạy công cụ. Hãy tôn trọng điều khoản sử dụng của game và chỉ dùng ảnh cho mục đích cá nhân hợp lệ.
+
+### Chính sách ký mã (Code signing policy)
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+**Vai trò trong nhóm**
+- Tác giả, người commit và người review: [KotexChick00](https://github.com/KotexChick00)
+- Người phê duyệt (Approver): [KotexChick00](https://github.com/KotexChick00)
+
+Đây là dự án một người duy trì nên một người giữ mọi vai trò. Xác thực hai lớp (MFA) được bật cho GitHub và SignPath.
+
+**Những gì được ký:** chỉ file `AoV.Image.Crawler.exe` do workflow GitHub Actions [`release.yml`](.github/workflows/release.yml) build từ các commit có gắn tag của repo này. Mỗi bản phát hành đều được phê duyệt thủ công trước khi ký.
+
+**Chính sách quyền riêng tư:** chương trình không thu thập, lưu trữ hay gửi dữ liệu cá nhân. Nó chỉ kết nối đến:
+1. Máy chủ CDN công khai của Garena (`dl.ops.kgtw.garenanow.com`) để tải ảnh, khi bạn bắt đầu một lượt tải.
+2. GitHub, để kiểm tra bản mới của app và `hero.json` (khi mở app và ở mục `7. update`). Yêu cầu này chỉ gồm thông tin mà mọi yêu cầu HTTP đều gửi (địa chỉ IP, user agent). App luôn hỏi xác nhận trước khi cài bản cập nhật. Muốn tắt kiểm tra khi mở app, đặt `UPDATE_CHECK_ON_START = False` trong `modules/core/config.py` rồi tự build.
+
+Chính sách quyền riêng tư của các dịch vụ này áp dụng cho các kết nối trên, ví dụ [GitHub](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). Log tải chỉ được ghi trong thư mục `logs/` trên máy bạn.
+
+**Cài đặt và gỡ cài đặt:** app là một file `.exe` chạy trực tiếp, không thay đổi cấu hình hệ thống. Để gỡ, xóa file `.exe` cùng các thư mục `splash`, `head`, `bust`, `logs` và file `hero.json` do app tạo ra.
+
+### Giấy phép của thành phần bên thứ ba
+
+| Thành phần | Giấy phép |
+|---|---|
+| [requests](https://github.com/psf/requests) | Apache-2.0 |
+| [urllib3](https://github.com/urllib3/urllib3) | MIT |
+| [idna](https://github.com/kjd/idna) | BSD-3-Clause |
+| [charset-normalizer](https://github.com/jawah/charset_normalizer) | MIT |
+| [certifi](https://github.com/certifi/python-certifi) | MPL-2.0 |
+| [PyInstaller](https://github.com/pyinstaller/pyinstaller) (công cụ build) | GPL-2.0-or-later với ngoại lệ cho bootloader |
+
+
 ---
 
 ## 🇬🇧 English
@@ -162,7 +200,7 @@ Get the latest `.exe` from the [Releases](https://github.com/KotexChick00/AovIma
 
 ```
 ========================================
-  AoV Image Crawler v1.2.0
+  AoV Image Crawler vx.x.x
   Chọn chế độ:
   1. splash      — chỉ tải splash
   2. head        — chỉ tải head
@@ -175,6 +213,8 @@ Get the latest `.exe` from the [Releases](https://github.com/KotexChick00/AovIma
 ```
 
 *(Menu text is in Vietnamese: 1–3 download a single type, 4 downloads everything, 5 renames, 6 downloads then renames, 7 checks for updates.)*
+
+After each run the app asks whether to run another mode and waits for Enter before closing, so the window does not exit on its own.
 
 4. Images will be saved into the corresponding folders:
 
@@ -241,6 +281,42 @@ cd AovImageCrawler
 pip install -r requirements.txt
 python main.py
 ```
+
+
+### Legal notice
+
+AoV Image Crawler is an independent tool and is **not affiliated with, sponsored by or endorsed by Garena, Level Infinite, Tencent, TIMi Studio Group** or any owner of Arena of Valor. Game names, hero names and images belong to their respective owners. This repository **does not contain any game assets**: images are only downloaded to your own machine when you run the tool. Please respect the game's terms of use and use downloaded images for legitimate personal purposes only.
+
+### Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+**Team roles**
+- Authors, committers and reviewers: [KotexChick00](https://github.com/KotexChick00)
+- Approvers: [KotexChick00](https://github.com/KotexChick00)
+
+This is a single-maintainer project, so one person holds all roles. Multi-factor authentication is enabled on GitHub and SignPath.
+
+**What is signed:** only `AoV.Image.Crawler.exe`, built by the GitHub Actions workflow [`release.yml`](.github/workflows/release.yml) from tagged commits of this repository. Every release is approved manually before signing.
+
+**Privacy policy:** this program does not collect, store or transmit personal data. It only connects to:
+1. Garena's public CDN (`dl.ops.kgtw.garenanow.com`) to download images, when you start a download.
+2. GitHub, to check for new versions of the app and `hero.json` (at startup and via `7. update`). The request contains only what any HTTP request sends (IP address, user agent). The app always asks for confirmation before installing an update. To disable the startup check, set `UPDATE_CHECK_ON_START = False` in `modules/core/config.py` and build your own copy.
+
+The privacy policies of these services apply to those connections, for example [GitHub](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). Download logs are written only to the `logs/` folder on your machine.
+
+**Installation and removal:** the app is a portable single `.exe` and makes no changes to system configuration. To uninstall, delete the `.exe` and the `splash`, `head`, `bust` and `logs` folders and the `hero.json` file created by the app.
+
+### Third-party licenses
+
+| Component | License |
+|---|---|
+| [requests](https://github.com/psf/requests) | Apache-2.0 |
+| [urllib3](https://github.com/urllib3/urllib3) | MIT |
+| [idna](https://github.com/kjd/idna) | BSD-3-Clause |
+| [charset-normalizer](https://github.com/jawah/charset_normalizer) | MIT |
+| [certifi](https://github.com/certifi/python-certifi) | MPL-2.0 |
+| [PyInstaller](https://github.com/pyinstaller/pyinstaller) (build tool) | GPL-2.0-or-later with bootloader exception |
 
 
 ---
