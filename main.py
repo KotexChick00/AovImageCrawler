@@ -135,13 +135,15 @@ def run_rename(preview_first: bool) -> None:
             renamer.run(dry_run=False)
 
 
-def main() -> None:
-    # Tự kiểm tra cập nhật khi mở app (im lặng nếu đã mới nhất / chưa cấu hình / offline)
-    if updater.startup_check(ask_yes_no):
-        return                       # script cập nhật đã chạy → thoát để thay file
+def pause(message: str = "Nhấn Enter để thoát...") -> None:
+    """Giữ cửa sổ console mở (khi chạy bằng cách bấm đúp file .exe)."""
+    try:
+        input(f"\n{message}")
+    except (EOFError, KeyboardInterrupt):
+        pass
 
-    mode = select_mode()
 
+def run_mode(mode: str) -> None:
     if mode in DOWNLOAD_MODES:
         run_download(mode)
     elif mode == "all+rename":
@@ -153,6 +155,25 @@ def main() -> None:
     elif mode == "update":
         print("── Kiểm tra cập nhật ──")
         updater.run_checks(ask_yes_no, verbose=True)
+
+
+def main() -> None:
+    # Tự kiểm tra cập nhật khi mở app (im lặng nếu đã mới nhất / chưa cấu hình / offline)
+    if updater.startup_check(ask_yes_no):
+        return                       # script cập nhật đã chạy → PHẢI thoát ngay để thay file
+
+    try:
+        while True:
+            run_mode(select_mode())
+            if not ask_yes_no("\nChạy chế độ khác?", default=False):
+                break
+    except KeyboardInterrupt:
+        print("\nĐã dừng theo yêu cầu.")
+    except Exception:
+        # Có lỗi bất ngờ: in ra thay vì để cửa sổ đóng ngay
+        traceback.print_exc()
+    finally:
+        pause()
 
 
 if __name__ == "__main__":
