@@ -7,14 +7,8 @@ Ngoài skin thường, còn có B-suffix variant chạy song song
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-
-from modules.core.config import (
-    SPLASH_URL, SPLASH_DIR, B_SUFFIX_RANGE, B_SUFFIX_WORKERS,
-    FLOWBORN_SPECIAL_HERO_ID,
-)
+from modules.core.config import SPLASH_URL, SPLASH_DIR
 from modules.core.id_builder import SplashIDBuilder
-from modules.core.miss_counter import MissCounter
 from modules.downloaders.base_downloader import BaseAssetDownloader
 from modules.utils.http_client import HttpClient
 
@@ -42,33 +36,6 @@ class SplashDownloader(BaseAssetDownloader):
     def build_base_id(self, hero_id: int) -> str:
         return self._builder.build_base(hero_id)
 
-    # ── Override process_hero để thêm B-suffix ────────────────────────────────
-
-    def process_hero(self, hero_id: int, hero_name: str, miss_counter: MissCounter) -> None:
-        """Tải skin thường rồi chạy song song B-suffix variants."""
-        import glob
-        hero_dir = self.output_dir + f"/{hero_id}"
-
-        base_id = self.build_base_id(hero_id)
-        result  = self._fetch(base_id, base_id, hero_dir)
-
-        if result == "missing" and not glob.glob(f"{hero_dir}/{base_id}.*"):
-            return
-
-        # Skin variants (tuần tự để miss_counter hoạt động đúng)
-        self._download_skins(hero_id, hero_name, hero_dir, miss_counter)
-
-        # Flowborn không có B-variant
-        if hero_id in FLOWBORN_SPECIAL_HERO_ID:
-            return
-
-        # B-suffix variants chạy song song độc lập
-        with ThreadPoolExecutor(max_workers=B_SUFFIX_WORKERS) as pool:
-            for b_suffix in B_SUFFIX_RANGE:
-                pool.submit(self._download_b_variant, hero_id, hero_name, hero_dir, b_suffix)
-
-    # ── Private ───────────────────────────────────────────────────────────────
-
-    def _download_b_variant(self, hero_id: int, hero_name: str, hero_dir: str, b_suffix: int) -> None:
-        file_id = self._builder.build_b_variant(hero_id, b_suffix)
-        self._fetch(file_id, file_id, hero_dir, quiet_missing=True)
+    def build_b_id(self, hero_id: int, skin_index: int, b_suffix: int) -> str:
+        # Splash B-variant luôn dùng skin 0 ({hero_id}00_B{n}) nên bỏ qua skin_index.
+        return self._builder.build_b_variant(hero_id, b_suffix)

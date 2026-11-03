@@ -54,7 +54,7 @@ except ImportError:
 GITHUB_REPO           = "KotexChick00/AovImageCrawler"   # "chủ-repo/tên-repo"
 GITHUB_BRANCH         = "main"                  # nhánh chứa hero.json
 HERO_JSON_PATH_IN_REPO = "hero.json"
-EXE_ASSET_NAME        = "AoVImageCrawler.exe"   # tên file .exe đính kèm trong release
+EXE_ASSET_NAME        = "AoV.Image.Crawler.exe"   # tên file .exe đính kèm trong release
 UPDATE_CHECK_ON_START = True                    # tự kiểm tra khi mở app
 
 # ── Output directories ────────────────────────────────────────────────────────
